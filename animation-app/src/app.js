@@ -7,7 +7,7 @@ import { notify } from './ui/notifications.js';
 import { bindOfflineStatus } from './offline/offline-status.js';
 import { exportProjectJson } from './import-export/export-json.js';
 import { importProjectJson } from './import-export/import-json.js';
-import { loadLatestProject } from './storage/project-repo.js';
+import { loadLatestProject, saveLatestProject } from './storage/project-repo.js';
 import { loadSettings, saveSettings } from './storage/settings-repo.js';
 import { queueAutosave } from './core/autosave.js';
 import { createPlayback } from './animation/playback.js';
@@ -89,8 +89,13 @@ export async function startApp() {
       onOpacityChange: actions.setOpacity,
       onExport: () => exportProjectJson(state),
       onImport: async (file) => {
-        const nextState = await importProjectJson(file);
-        actions.importHydratedState(nextState);
+        try {
+          const nextState = await importProjectJson(file);
+          actions.importHydratedState(nextState);
+          await saveLatestProject(nextState);
+        } catch (error) {
+          notify(error?.message ?? 'Import failed');
+        }
       }
     });
 
