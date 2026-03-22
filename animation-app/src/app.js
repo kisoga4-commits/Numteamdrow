@@ -32,10 +32,14 @@ export async function startApp() {
   const savedSettings = loadSettings();
   if (savedSettings.zoom) updateState({ zoom: savedSettings.zoom });
 
-  const latest = await loadLatestProject();
-  if (latest) {
-    replaceState({ ...state, ...latest, currentTool: 'brush', currentFrameIndex: 0, playing: false, zoom: state.zoom });
-    notify('Loaded latest project');
+  try {
+    const latest = await loadLatestProject();
+    if (latest) {
+      replaceState({ ...state, ...latest, currentTool: 'brush', currentFrameIndex: 0, playing: false, zoom: state.zoom });
+      notify('Loaded latest project');
+    }
+  } catch {
+    notify('Unable to load saved project in this browser mode');
   }
 
   const stage = createStageController({
