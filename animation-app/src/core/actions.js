@@ -1,5 +1,5 @@
 // Central action creators to keep UI modules decoupled from raw state mutations.
-import { updateState, updateStateWith } from './state.js';
+import { replaceState, updateState, updateStateWith } from './state.js';
 import { createTimelineController } from '../animation/timeline-architecture.js';
 
 export function createActions({ getState, notify, saveSettings }) {
@@ -32,9 +32,7 @@ export function createActions({ getState, notify, saveSettings }) {
     },
     timeline,
     importHydratedState(nextState) {
-      updateStateWith((state) => {
-        Object.assign(state, nextState);
-      });
+      replaceState(nextState);
       notify('Project imported');
     }
   };

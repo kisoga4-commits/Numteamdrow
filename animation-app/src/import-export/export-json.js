@@ -1,12 +1,17 @@
 // Exports current project as downloadable JSON file.
 import { serializeProject } from '../core/serializer.js';
 
-export function exportProjectJson(state) {
-  const blob = new Blob([JSON.stringify(serializeProject(state), null, 2)], { type: 'application/json' });
+export function exportProjectJson(state, filename = 'project.json') {
+  const payload = serializeProject(state);
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `animation-project-${Date.now()}.json`;
-  a.click();
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
   URL.revokeObjectURL(url);
 }
