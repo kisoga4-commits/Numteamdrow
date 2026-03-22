@@ -1,0 +1,11 @@
+/* Tablet responsive fallback layout. */
+@media (max-width: 1200px) {
+  .app-grid {
+    grid-template-columns: 68px 1fr;
+    grid-template-rows: 1fr 220px 250px;
+    grid-template-areas:
+      'toolbar stage'
+      'toolbar properties'
+      'toolbar timeline';
+  }
+}

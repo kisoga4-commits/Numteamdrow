@@ -1,0 +1,40 @@
+/* Global base styles and theme tokens. */
+:root {
+  --bg: #0b1020;
+  --panel: #111827;
+  --panel-2: #1f2937;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #60a5fa;
+  --danger: #f87171;
+  --gap: 12px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #141d35, var(--bg) 40%);
+  color: var(--text);
+  min-height: 100vh;
+}
+button, input, select { font: inherit; }
+button {
+  background: var(--panel-2);
+  border: 1px solid #334155;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:active, .is-active { background: #1e3a5f; }
+.panel-title { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+input[type='range'] { width: 100%; }
+input, select {
+  background: #0f172a;
+  color: var(--text);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px;
+}
