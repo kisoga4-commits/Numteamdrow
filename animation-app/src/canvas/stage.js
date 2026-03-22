@@ -10,11 +10,27 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function snapshotCanvas(canvas) {
+  const snapshot = document.createElement('canvas');
+  snapshot.width = canvas.width;
+  snapshot.height = canvas.height;
+
+  const snapshotCtx = snapshot.getContext('2d');
+  if (snapshotCtx) {
+    snapshotCtx.drawImage(canvas, 0, 0);
+  }
+
+  return snapshot;
+}
+
 export function createStageController({ getState, onFrameCommit, onViewportChange }) {
   const stageInner = document.getElementById('stage-inner');
   const canvasWrap = document.getElementById('canvas-wrap');
   const mainCanvas = document.getElementById('main-canvas');
+  const onionCanvas = document.getElementById('onion-canvas');
   const overlayCanvas = document.getElementById('overlay-canvas');
+  const canvases = [onionCanvas, mainCanvas, overlayCanvas];
+
   const ctx = mainCanvas.getContext('2d');
   const overlayCtx = overlayCanvas.getContext('2d');
 
@@ -26,15 +42,49 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
 
   const pointFromEvent = (event) => {
     const rect = overlayCanvas.getBoundingClientRect();
+    const scaleX = overlayCanvas.width / Math.max(rect.width, 1);
+    const scaleY = overlayCanvas.height / Math.max(rect.height, 1);
+
     return {
-      x: ((event.clientX - rect.left) / rect.width) * overlayCanvas.width,
-      y: ((event.clientY - rect.top) / rect.height) * overlayCanvas.height
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
     };
   };
 
   const syncTransform = () => {
     const state = getState();
     canvasWrap.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  };
+
+  const resizeCanvasesToDisplaySize = () => {
+    const rect = canvasWrap.getBoundingClientRect();
+    const cssWidth = Math.max(1, Math.round(rect.width));
+    const cssHeight = Math.max(1, Math.round(rect.height));
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const nextWidth = Math.max(1, Math.round(cssWidth * dpr));
+    const nextHeight = Math.max(1, Math.round(cssHeight * dpr));
+
+    let resized = false;
+
+    canvases.forEach((canvas) => {
+      if (!canvas) return;
+      if (canvas.width === nextWidth && canvas.height === nextHeight) return;
+
+      const snapshot = snapshotCanvas(canvas);
+      canvas.width = nextWidth;
+      canvas.height = nextHeight;
+
+      const canvasCtx = canvas.getContext('2d');
+      if (canvasCtx && snapshot.width > 0 && snapshot.height > 0) {
+        canvasCtx.drawImage(snapshot, 0, 0, nextWidth, nextHeight);
+      }
+
+      resized = true;
+    });
+
+    if (resized) {
+      clearOverlayCanvas(overlayCtx);
+    }
   };
 
   const isPanModifier = (event) => {
@@ -56,6 +106,8 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
 
   const onDown = (event) => {
     if (event.button !== 0 && event.button !== 1) return;
+
+    event.preventDefault();
     activePointerId = event.pointerId;
     overlayCanvas.setPointerCapture(event.pointerId);
 
@@ -72,6 +124,8 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
 
   const onMove = (event) => {
     if (activePointerId !== event.pointerId) return;
+
+    event.preventDefault();
 
     if (panning && panStart) {
       const dx = event.clientX - panStart.x;
@@ -111,7 +165,10 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
 
   const onUp = (event) => {
     if (activePointerId !== event.pointerId) return;
+
+    event.preventDefault();
     finishPointer();
+
     if (overlayCanvas.hasPointerCapture(event.pointerId)) {
       overlayCanvas.releasePointerCapture(event.pointerId);
     }
@@ -119,7 +176,10 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
 
   const onCancel = (event) => {
     if (activePointerId !== event.pointerId) return;
+
+    event.preventDefault();
     finishPointer();
+
     if (overlayCanvas.hasPointerCapture(event.pointerId)) {
       overlayCanvas.releasePointerCapture(event.pointerId);
     }
@@ -154,12 +214,21 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
     }
   };
 
+  const onResize = () => {
+    resizeCanvasesToDisplaySize();
+  };
+
   overlayCanvas.style.cursor = 'crosshair';
+  resizeCanvasesToDisplaySize();
   overlayCanvas.addEventListener('pointerdown', onDown);
   overlayCanvas.addEventListener('pointermove', onMove);
   overlayCanvas.addEventListener('pointerup', onUp);
   overlayCanvas.addEventListener('pointercancel', onCancel);
+  overlayCanvas.addEventListener('lostpointercapture', finishPointer);
   overlayCanvas.addEventListener('wheel', onWheel, { passive: false });
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+  window.visualViewport?.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
 
@@ -180,7 +249,11 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
       overlayCanvas.removeEventListener('pointermove', onMove);
       overlayCanvas.removeEventListener('pointerup', onUp);
       overlayCanvas.removeEventListener('pointercancel', onCancel);
+      overlayCanvas.removeEventListener('lostpointercapture', finishPointer);
       overlayCanvas.removeEventListener('wheel', onWheel);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+      window.visualViewport?.removeEventListener('resize', onResize);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     }

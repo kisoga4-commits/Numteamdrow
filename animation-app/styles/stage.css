@@ -37,6 +37,7 @@
   width: min(100%, 960px);
   aspect-ratio: 16/9;
   transform-origin: center center;
+  touch-action: none;
   background:
     linear-gradient(45deg, #dbe4f4 25%, #f5f8ff 25%, #f5f8ff 50%, #dbe4f4 50%, #dbe4f4 75%, #f5f8ff 75%, #f5f8ff);
   background-size: 28px 28px;
@@ -51,6 +52,25 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  touch-action: none;
+}
+
+#onion-canvas,
+#main-canvas {
+  pointer-events: none;
+}
+
+#onion-canvas {
+  z-index: 1;
+}
+
+#main-canvas {
+  z-index: 2;
+}
+
+#overlay-canvas {
+  z-index: 3;
+  pointer-events: auto;
 }
 
 .stage-watermark {
@@ -64,6 +84,8 @@
   border-radius: 8px;
   padding: 8px;
   font-size: 11px;
+  z-index: 4;
+  pointer-events: none;
 }
 
 .status-chip {
@@ -76,4 +98,5 @@
   border: 1px solid #475569;
   padding: 6px 8px;
   border-radius: 8px;
+  pointer-events: none;
 }
