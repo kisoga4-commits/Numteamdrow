@@ -1,0 +1,13 @@
+/* Vertical tool list styles. */
+.toolbar {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tool-btn {
+  width: 100%;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 12px;
+}
