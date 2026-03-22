@@ -12,7 +12,10 @@ import { loadSettings, saveSettings } from './storage/settings-repo.js';
 import { queueAutosave } from './core/autosave.js';
 import { createPlayback } from './animation/playback.js';
 import { createActions } from './core/actions.js';
-import { getState, replaceState, subscribe, updateState } from './core/state.js';
+import { getState, replaceState, subscribe, updateState, updateStateWith } from './core/state.js';
+import { createStageController } from './canvas/stage.js';
+import { drawFrameToCanvas } from './canvas/renderer.js';
+import { renderOnionSkin } from './canvas/onion-skin.js';
 
 export async function startApp() {
   const appRoot = document.getElementById('app');
@@ -43,8 +46,32 @@ export async function startApp() {
 
   const actions = createActions({ getState, notify, saveSettings });
 
+  const stageController = createStageController({
+    getState,
+    onFrameCommit: (frame) => {
+      updateStateWith((state) => {
+        state.frames[state.currentFrameIndex] = {
+          ...state.frames[state.currentFrameIndex],
+          ...frame
+        };
+      });
+    },
+    onViewportChange: (viewport) => updateState(viewport)
+  });
+
+  const onionCanvas = document.getElementById('onion-canvas');
+  const onionCtx = onionCanvas?.getContext('2d');
+
   const render = () => {
     const state = getState();
+    const activeFrame = state.frames[state.currentFrameIndex];
+    const previousFrame = state.frames[state.currentFrameIndex - 1] ?? null;
+
+    drawFrameToCanvas(stageController.mainCtx, activeFrame, stageController.mainCanvas.width, stageController.mainCanvas.height);
+    if (onionCtx && onionCanvas) {
+      renderOnionSkin(onionCtx, previousFrame, onionCanvas.width, onionCanvas.height, state.onionSkin);
+    }
+    stageController.syncTransform();
 
     renderToolbar(toolbarRoot, {
       activeTool: state.currentTool,
@@ -99,5 +126,6 @@ export async function startApp() {
   window.addEventListener('beforeunload', () => {
     unsubscribe();
     playback.stop();
+    stageController.destroy();
   });
 }
