@@ -1,13 +1,38 @@
 /* Vertical tool list styles. */
 .toolbar {
   padding: 10px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+}
+
+.toolbar-brand h1 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.toolbar-brand p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.toolbar-tools {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: auto;
+  padding-right: 2px;
 }
+
 .tool-btn {
   width: 100%;
   padding: 8px 6px;
+  text-transform: capitalize;
   text-align: center;
   font-size: 12px;
+}
+
+.theme-toggle {
+  width: 100%;
 }

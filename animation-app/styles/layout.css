@@ -4,20 +4,35 @@
   display: grid;
   gap: var(--gap);
   padding: var(--gap);
-  grid-template-columns: 84px 1fr 280px;
-  grid-template-rows: 1fr 190px;
+  grid-template-columns: 96px 1fr 300px;
+  grid-template-rows: 1fr 210px;
   grid-template-areas:
     'toolbar stage properties'
     'toolbar timeline timeline';
 }
-.toolbar { grid-area: toolbar; }
-.stage-area { grid-area: stage; }
-.properties-panel { grid-area: properties; }
-.timeline { grid-area: timeline; }
+
+.toolbar {
+  grid-area: toolbar;
+}
+
+.stage-area {
+  grid-area: stage;
+}
+
+.properties-panel {
+  grid-area: properties;
+}
+
+.timeline {
+  grid-area: timeline;
+}
+
 .toolbar,
 .properties-panel,
-.timeline {
-  background: rgba(17, 24, 39, 0.94);
-  border: 1px solid #253046;
+.timeline,
+.stage-area {
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  border: 1px solid var(--panel-border);
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
