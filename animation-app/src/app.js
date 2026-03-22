@@ -128,7 +128,9 @@ export async function startApp() {
       onSelectFrame: actions.timeline.commands.selectFrame
     });
 
-    queueAutosave(state);
+    queueAutosave(state, {
+      onSaved: () => notify('Autosaved project')
+    });
   };
 
   bindOfflineStatus(document.getElementById('status-chip'));
