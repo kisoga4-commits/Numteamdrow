@@ -1,6 +1,15 @@
 // Properties panel rendering from central state.
 export function renderProperties(root, model) {
-  const { color, brushSize, opacity, onColorChange, onBrushSizeChange, onOpacityChange, onExport, onImport } = model;
+  const {
+    color,
+    brushSize,
+    opacity,
+    onColorChange,
+    onBrushSizeChange,
+    onOpacityChange,
+    onExport,
+    onImport
+  } = model;
 
   root.innerHTML = `
     <div class="prop-group">
@@ -10,11 +19,11 @@ export function renderProperties(root, model) {
         <input id="prop-color" type="color" value="${color}" />
       </label>
       <label>
-        Size
-        <input id="prop-size" type="range" min="1" max="60" value="${brushSize}" />
+        Size: <strong>${brushSize}px</strong>
+        <input id="prop-size" type="range" min="1" max="80" value="${brushSize}" />
       </label>
       <label>
-        Opacity
+        Opacity: <strong>${Math.round(opacity * 100)}%</strong>
         <input id="prop-opacity" type="range" min="0" max="100" value="${Math.round(opacity * 100)}" />
       </label>
     </div>
