@@ -2,7 +2,7 @@
 const TOOLS = ['brush', 'eraser', 'select', 'line', 'rectangle', 'ellipse', 'fill', 'text'];
 
 export function renderToolbar(root, model) {
-  const { activeTool, isDarkMode, onSelectTool, onToggleTheme } = model;
+  const { activeTool, theme, onSelectTool, onToggleTheme } = model;
 
   root.innerHTML = `
     <div class="toolbar-brand">
@@ -17,7 +17,7 @@ export function renderToolbar(root, model) {
     </div>
 
     <div class="toolbar-footer">
-      <button id="theme-toggle" class="theme-toggle">${isDarkMode ? '🌙 Dark' : '☀️ Light'}</button>
+      <button id="theme-toggle" class="theme-toggle">${theme === 'dark' ? '🌙 Dark' : '☀️ Light'}</button>
     </div>
   `;
 

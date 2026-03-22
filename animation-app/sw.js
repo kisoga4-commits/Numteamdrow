@@ -1,5 +1,5 @@
-/* Baseline service worker for offline-first app-shell caching (Phase 1). */
-const CACHE_NAME = 'animation-app-phase1-v1';
+/* Offline-first service worker for app-shell caching. */
+const CACHE_NAME = 'animation-app-phase1-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,6 +14,19 @@ const APP_SHELL = [
   './styles/responsive.css',
   './src/main.js',
   './src/app.js',
+  './src/core/state.js',
+  './src/core/actions.js',
+  './src/core/autosave.js',
+  './src/core/serializer.js',
+  './src/animation/playback.js',
+  './src/animation/frame-manager.js',
+  './src/animation/timeline-architecture.js',
+  './src/storage/db.js',
+  './src/storage/project-repo.js',
+  './src/storage/settings-repo.js',
+  './src/import-export/export-json.js',
+  './src/import-export/import-json.js',
+  './src/offline/offline-status.js',
   './src/ui/layout.js',
   './src/ui/toolbar.js',
   './src/ui/properties-panel.js',

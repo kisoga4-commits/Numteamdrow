@@ -1,5 +1,5 @@
 // Repository abstraction for reading/writing project snapshots.
-import { withStore } from './db.js';
+import { STORES, requestToPromise, withStore } from './db.js';
 
 const LAST_PROJECT_ID = 'last-project';
 const LOCAL_FALLBACK_KEY = 'animation-app-last-project';
@@ -23,7 +23,9 @@ function loadLocalFallback() {
 
 export async function saveLatestProject(project) {
   try {
-    await withStore('readwrite', (store) => store.put({ id: LAST_PROJECT_ID, payload: project, updatedAt: Date.now() }));
+    await withStore(STORES.projects, 'readwrite', (store) =>
+      requestToPromise(store.put({ id: LAST_PROJECT_ID, payload: project, updatedAt: Date.now() }))
+    );
   } catch {
     saveLocalFallback(project);
   }
@@ -31,13 +33,8 @@ export async function saveLatestProject(project) {
 
 export async function loadLatestProject() {
   try {
-    return await withStore('readonly', (store) => {
-      return new Promise((resolve, reject) => {
-        const req = store.get(LAST_PROJECT_ID);
-        req.onsuccess = () => resolve(req.result?.payload ?? null);
-        req.onerror = () => reject(req.error);
-      });
-    });
+    const record = await withStore(STORES.projects, 'readonly', (store) => requestToPromise(store.get(LAST_PROJECT_ID)));
+    return record?.payload ?? null;
   } catch {
     return loadLocalFallback();
   }

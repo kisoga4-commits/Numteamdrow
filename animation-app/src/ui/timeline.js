@@ -1,36 +1,54 @@
-// Timeline scaffold for Phase 1.
+// Timeline view that renders from state and dispatches command callbacks.
 export function renderTimeline(root, model) {
-  const { frameCount, onPlaceholderAction } = model;
+  const {
+    frames,
+    currentFrameIndex,
+    fps,
+    onionSkin,
+    playing,
+    onPlay,
+    onStop,
+    onAddFrame,
+    onDuplicateFrame,
+    onDeleteFrame,
+    onSetFps,
+    onToggleOnion,
+    onSelectFrame
+  } = model;
 
   root.innerHTML = `
     <div class="timeline-controls">
-      <button id="tl-play">▶ Play</button>
+      <button id="tl-play">▶ ${playing ? 'Playing' : 'Play'}</button>
       <button id="tl-stop">⏹ Stop</button>
       <button id="tl-add">＋ Frame</button>
-      <label class="inline-label">FPS <input id="tl-fps" type="number" min="1" max="60" value="12" /></label>
-      <label class="inline-label"><input id="tl-onion" type="checkbox" /> Onion Skin</label>
+      <button id="tl-dup">⧉ Duplicate</button>
+      <button id="tl-del">🗑 Delete</button>
+      <label class="inline-label">FPS <input id="tl-fps" type="number" min="1" max="60" value="${fps}" /></label>
+      <label class="inline-label"><input id="tl-onion" type="checkbox" ${onionSkin ? 'checked' : ''} /> Onion Skin</label>
     </div>
     <div class="frames-row" id="frames-row"></div>
   `;
 
-  root.querySelector('#tl-play')?.addEventListener('click', () => onPlaceholderAction('play'));
-  root.querySelector('#tl-stop')?.addEventListener('click', () => onPlaceholderAction('stop'));
-  root.querySelector('#tl-add')?.addEventListener('click', () => onPlaceholderAction('add-frame'));
-  root.querySelector('#tl-fps')?.addEventListener('change', () => onPlaceholderAction('set-fps'));
-  root.querySelector('#tl-onion')?.addEventListener('change', () => onPlaceholderAction('toggle-onion'));
+  root.querySelector('#tl-play')?.addEventListener('click', onPlay);
+  root.querySelector('#tl-stop')?.addEventListener('click', onStop);
+  root.querySelector('#tl-add')?.addEventListener('click', onAddFrame);
+  root.querySelector('#tl-dup')?.addEventListener('click', onDuplicateFrame);
+  root.querySelector('#tl-del')?.addEventListener('click', onDeleteFrame);
+  root.querySelector('#tl-fps')?.addEventListener('change', (event) => onSetFps(event.target.value));
+  root.querySelector('#tl-onion')?.addEventListener('change', (event) => onToggleOnion(event.target.checked));
 
   const row = root.querySelector('#frames-row');
   if (!row) return;
 
-  for (let i = 0; i < frameCount; i += 1) {
+  frames.forEach((frame, index) => {
     const thumb = document.createElement('button');
-    thumb.className = `frame-thumb ${i === 0 ? 'active' : ''}`;
+    thumb.className = `frame-thumb ${index === currentFrameIndex ? 'active' : ''}`;
     thumb.type = 'button';
     thumb.innerHTML = `
-      <span class="frame-preview">Frame ${i + 1}</span>
-      <span class="frame-meta">00:${String(i).padStart(2, '0')}</span>
+      <span class="frame-preview">Frame ${index + 1}</span>
+      <span class="frame-meta">${frame.id.slice(0, 8)}</span>
     `;
-    thumb.addEventListener('click', () => onPlaceholderAction(`select-frame-${i + 1}`));
+    thumb.addEventListener('click', () => onSelectFrame(index));
     row.appendChild(thumb);
-  }
+  });
 }

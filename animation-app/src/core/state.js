@@ -1,7 +1,7 @@
 // In-memory global state container for predictable app behavior.
 import { APP_CONFIG } from '../config.js';
 
-const blankFrame = () => ({ id: crypto.randomUUID(), imageDataUrl: null });
+const blankFrame = () => ({ id: crypto.randomUUID(), imageDataUrl: null, durationMs: 1000 / APP_CONFIG.defaultFps });
 
 export const state = {
   currentTool: 'brush',
@@ -21,6 +21,14 @@ export const state = {
 
 const listeners = new Set();
 
+function emit() {
+  listeners.forEach((listener) => listener(state));
+}
+
+export function getState() {
+  return state;
+}
+
 export function subscribe(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -28,12 +36,17 @@ export function subscribe(listener) {
 
 export function updateState(partial) {
   Object.assign(state, partial);
-  listeners.forEach((listener) => listener(state));
+  emit();
+}
+
+export function updateStateWith(producer) {
+  producer(state);
+  emit();
 }
 
 export function replaceState(nextState) {
   Object.assign(state, nextState);
-  listeners.forEach((listener) => listener(state));
+  emit();
 }
 
 export function createBlankFrame() {
