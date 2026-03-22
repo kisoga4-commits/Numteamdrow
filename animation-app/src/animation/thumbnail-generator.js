@@ -1,4 +1,6 @@
 // Generates a tiny canvas thumbnail element for frame previews.
+import { drawFrameToCanvas } from '../canvas/renderer.js';
+
 export function createThumbnail(frame, index, active) {
   const button = document.createElement('button');
   button.className = `frame-thumb ${active ? 'active' : ''}`;
@@ -15,19 +17,7 @@ export function createThumbnail(frame, index, active) {
 
   const canvas = button.querySelector('canvas');
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  if (frame.imageDataUrl) {
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    img.src = frame.imageDataUrl;
-  }
+  drawFrameToCanvas(ctx, frame, canvas.width, canvas.height);
 
   return button;
 }

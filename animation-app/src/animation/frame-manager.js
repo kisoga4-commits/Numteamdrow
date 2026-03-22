@@ -12,7 +12,13 @@ export function duplicateFrame(state) {
   const duplicated = {
     ...createBlankFrame(),
     imageDataUrl: current.imageDataUrl,
-    durationMs: current.durationMs
+    durationMs: current.durationMs,
+    layers: Array.isArray(current.layers)
+      ? current.layers.map((layer) => ({
+          id: crypto.randomUUID(),
+          strokes: Array.isArray(layer.strokes) ? structuredClone(layer.strokes) : []
+        }))
+      : createBlankFrame().layers
   };
 
   state.frames.splice(state.currentFrameIndex + 1, 0, duplicated);
@@ -22,7 +28,7 @@ export function duplicateFrame(state) {
 export function deleteFrame(state) {
   if (state.frames.length === 1) {
     // Keep at least one frame in timeline, but clear its image content.
-    state.frames[0] = { ...state.frames[0], imageDataUrl: null };
+    state.frames[0] = { ...createBlankFrame(), id: state.frames[0].id };
     state.currentFrameIndex = 0;
     return;
   }

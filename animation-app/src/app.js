@@ -49,11 +49,30 @@ export async function startApp() {
 
   const stageController = createStageController({
     getState,
-    onFrameCommit: (frame) => {
+    onFrameCommit: (stroke) => {
       updateStateWith((state) => {
+        const activeFrame = state.frames[state.currentFrameIndex];
+        if (!activeFrame) return;
+
+        const activeLayerIndex = Math.max(
+          0,
+          Math.min(state.layerSettings.activeLayer ?? 0, (state.layerSettings.layerCount ?? 1) - 1)
+        );
+
+        const layers = Array.isArray(activeFrame.layers) ? [...activeFrame.layers] : [];
+        while (layers.length < (state.layerSettings.layerCount ?? 1)) {
+          layers.push({ id: crypto.randomUUID(), strokes: [] });
+        }
+
+        const targetLayer = layers[activeLayerIndex] ?? { id: crypto.randomUUID(), strokes: [] };
+        layers[activeLayerIndex] = {
+          ...targetLayer,
+          strokes: [...(Array.isArray(targetLayer.strokes) ? targetLayer.strokes : []), stroke]
+        };
+
         state.frames[state.currentFrameIndex] = {
-          ...state.frames[state.currentFrameIndex],
-          ...frame
+          ...activeFrame,
+          layers
         };
       });
     },

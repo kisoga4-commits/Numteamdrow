@@ -2,10 +2,72 @@
 
 const PROJECT_VERSION = 1;
 const DEFAULT_LAYER_SETTINGS = { activeLayer: 0, layerCount: 1 };
-const DEFAULT_FRAME = () => ({ id: crypto.randomUUID(), imageDataUrl: null });
+const DEFAULT_STROKE = (tool = 'brush') => ({
+  id: crypto.randomUUID(),
+  tool,
+  color: tool === 'eraser' ? null : '#4f46e5',
+  size: 8,
+  opacity: 1,
+  points: []
+});
+const DEFAULT_LAYER = () => ({ id: crypto.randomUUID(), strokes: [] });
+const DEFAULT_FRAME = () => ({ id: crypto.randomUUID(), imageDataUrl: null, layers: [DEFAULT_LAYER()] });
 
 function asFiniteNumber(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function normalizePoint(point) {
+  return {
+    x: asFiniteNumber(point?.x) ?? 0,
+    y: asFiniteNumber(point?.y) ?? 0
+  };
+}
+
+function normalizeStroke(stroke, frameIndex, layerIndex, strokeIndex, errors) {
+  if (!stroke || typeof stroke !== 'object' || Array.isArray(stroke)) {
+    errors.push(`frames[${frameIndex}].layers[${layerIndex}].strokes[${strokeIndex}] must be an object`);
+    return DEFAULT_STROKE();
+  }
+
+  const tool = stroke.tool === 'eraser' ? 'eraser' : 'brush';
+  if (stroke.tool != null && stroke.tool !== 'brush' && stroke.tool !== 'eraser') {
+    errors.push(`frames[${frameIndex}].layers[${layerIndex}].strokes[${strokeIndex}].tool must be "brush" or "eraser"`);
+  }
+
+  const rawPoints = Array.isArray(stroke.points) ? stroke.points : [];
+  if (!Array.isArray(stroke.points)) {
+    errors.push(`frames[${frameIndex}].layers[${layerIndex}].strokes[${strokeIndex}].points must be an array`);
+  }
+
+  return {
+    id: typeof stroke.id === 'string' && stroke.id.trim() ? stroke.id : crypto.randomUUID(),
+    tool,
+    color: tool === 'eraser' ? null : (typeof stroke.color === 'string' ? stroke.color : '#4f46e5'),
+    size: asFiniteNumber(stroke.size) ?? 8,
+    opacity: asFiniteNumber(stroke.opacity) ?? 1,
+    points: rawPoints.map((point) => normalizePoint(point))
+  };
+}
+
+function normalizeLayer(layer, frameIndex, layerIndex, errors) {
+  if (!layer || typeof layer !== 'object' || Array.isArray(layer)) {
+    errors.push(`frames[${frameIndex}].layers[${layerIndex}] must be an object`);
+    return DEFAULT_LAYER();
+  }
+
+  const strokes = Array.isArray(layer.strokes)
+    ? layer.strokes.map((stroke, strokeIndex) => normalizeStroke(stroke, frameIndex, layerIndex, strokeIndex, errors))
+    : [];
+
+  if (!Array.isArray(layer.strokes)) {
+    errors.push(`frames[${frameIndex}].layers[${layerIndex}].strokes must be an array`);
+  }
+
+  return {
+    id: typeof layer.id === 'string' && layer.id.trim() ? layer.id : crypto.randomUUID(),
+    strokes
+  };
 }
 
 function normalizeFrame(frame, index, errors) {
@@ -22,7 +84,10 @@ function normalizeFrame(frame, index, errors) {
   return {
     id: typeof frame.id === 'string' && frame.id.trim() ? frame.id : crypto.randomUUID(),
     imageDataUrl,
-    durationMs: asFiniteNumber(frame.durationMs) ?? undefined
+    durationMs: asFiniteNumber(frame.durationMs) ?? undefined,
+    layers: Array.isArray(frame.layers)
+      ? frame.layers.map((layer, layerIndex) => normalizeLayer(layer, index, layerIndex, errors))
+      : [DEFAULT_LAYER()]
   };
 }
 
@@ -93,6 +158,20 @@ export function validateProjectPayload(payload) {
     }
   }
 
+  if (Array.isArray(payload.frames)) {
+    payload.frames.forEach((frame, frameIndex) => {
+      if (Array.isArray(frame?.layers)) {
+        frame.layers.forEach((layer, layerIndex) => {
+          if (Array.isArray(layer?.strokes)) {
+            layer.strokes.forEach((stroke, strokeIndex) => {
+              normalizeStroke(stroke, frameIndex, layerIndex, strokeIndex, errors);
+            });
+          }
+        });
+      }
+    });
+  }
+
   return {
     valid: errors.length === 0,
     errors
@@ -104,6 +183,17 @@ export function hydrateProject(project) {
   const normalizedFrames = Array.isArray(project.frames)
     ? project.frames.map((frame, index) => normalizeFrame(frame, index, errors))
     : [];
+  const layerCount = asFiniteNumber(project.layerSettings?.layerCount) ?? DEFAULT_LAYER_SETTINGS.layerCount;
+  const ensuredFrames = (normalizedFrames.length ? normalizedFrames : [DEFAULT_FRAME()]).map((frame) => {
+    const layers = Array.isArray(frame.layers) ? [...frame.layers] : [];
+    while (layers.length < layerCount) {
+      layers.push(DEFAULT_LAYER());
+    }
+    return {
+      ...frame,
+      layers: layers.slice(0, layerCount)
+    };
+  });
 
   return {
     color: project.color ?? '#4f46e5',
@@ -111,10 +201,10 @@ export function hydrateProject(project) {
     opacity: asFiniteNumber(project.opacity) ?? 1,
     fps: asFiniteNumber(project.fps) ?? 8,
     onionSkin: Boolean(project.onionSkin),
-    frames: normalizedFrames.length ? normalizedFrames : [DEFAULT_FRAME()],
+    frames: ensuredFrames,
     layerSettings: {
       activeLayer: asFiniteNumber(project.layerSettings?.activeLayer) ?? DEFAULT_LAYER_SETTINGS.activeLayer,
-      layerCount: asFiniteNumber(project.layerSettings?.layerCount) ?? DEFAULT_LAYER_SETTINGS.layerCount
+      layerCount
     },
     currentFrameIndex: 0,
     currentTool: 'brush',

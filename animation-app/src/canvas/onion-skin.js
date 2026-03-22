@@ -1,21 +1,22 @@
 // Onion skin renderer for previous frame preview.
-const onionTokens = new WeakMap();
-
-function nextToken(ctx) {
-  const token = (onionTokens.get(ctx) ?? 0) + 1;
-  onionTokens.set(ctx, token);
-  return token;
-}
+import { drawFrameStrokes } from './renderer.js';
 
 export function renderOnionSkin(ctx, prevFrame, width, height, enabled) {
-  const token = nextToken(ctx);
   ctx.clearRect(0, 0, width, height);
 
-  if (!enabled || !prevFrame?.imageDataUrl) return;
+  if (!enabled || !prevFrame) return;
 
+  if (Array.isArray(prevFrame.layers)) {
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    drawFrameStrokes(ctx, prevFrame);
+    ctx.restore();
+    return;
+  }
+
+  if (!prevFrame.imageDataUrl) return;
   const img = new Image();
   img.onload = () => {
-    if (onionTokens.get(ctx) !== token) return;
     ctx.clearRect(0, 0, width, height);
     ctx.globalAlpha = 0.2;
     ctx.drawImage(img, 0, 0, width, height);

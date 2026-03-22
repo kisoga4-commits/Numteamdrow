@@ -1,5 +1,4 @@
 // Stage controller binds canvas pointer events with selected drawing tool.
-import { frameFromCanvas } from './export-frame.js';
 import { clearOverlayCanvas } from './renderer.js';
 import { getTool } from '../tools/tool-manager.js';
 
@@ -150,8 +149,10 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
     if (drawing) {
       drawing = false;
       const tool = getTool(state.currentTool);
-      tool.onPointerUp?.(ctx, state, overlayCtx);
-      onFrameCommit(frameFromCanvas(mainCanvas));
+      const stroke = tool.onPointerUp?.(ctx, state, overlayCtx);
+      if (stroke) {
+        onFrameCommit(stroke);
+      }
     }
 
     if (panning) {
