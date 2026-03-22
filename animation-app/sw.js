@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v5';
 const APP_SHELL_CACHE = `animation-app-shell-${CACHE_VERSION}`;
 
 const APP_SHELL_FILES = [
