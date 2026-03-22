@@ -1,40 +1,97 @@
 /* Global base styles and theme tokens. */
 :root {
   --bg: #0b1020;
+  --bg-elevated: #141b2f;
   --panel: #111827;
   --panel-2: #1f2937;
+  --panel-border: #2a344a;
   --text: #e5e7eb;
   --muted: #9ca3af;
   --accent: #60a5fa;
+  --accent-soft: rgba(96, 165, 250, 0.2);
   --danger: #f87171;
   --gap: 12px;
 }
-* { box-sizing: border-box; }
+
+:root[data-theme='light'] {
+  --bg: #f3f6ff;
+  --bg-elevated: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #eef2ff;
+  --panel-border: #cbd5e1;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.15);
+  --danger: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Inter, Segoe UI, Roboto, sans-serif;
-  background: radial-gradient(circle at top, #141d35, var(--bg) 40%);
+  background: radial-gradient(circle at top, var(--bg-elevated), var(--bg) 50%);
   color: var(--text);
   min-height: 100vh;
 }
-button, input, select { font: inherit; }
+
+button,
+input,
+select {
+  font: inherit;
+}
+
 button {
   background: var(--panel-2);
-  border: 1px solid #334155;
+  border: 1px solid var(--panel-border);
   color: var(--text);
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
+  transition: border-color 120ms ease, transform 120ms ease;
 }
-button:hover { border-color: var(--accent); }
-button:active, .is-active { background: #1e3a5f; }
-.panel-title { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
-label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-input[type='range'] { width: 100%; }
-input, select {
-  background: #0f172a;
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.panel-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 8px;
+}
+
+input,
+select {
+  background: var(--panel-2);
   color: var(--text);
-  border: 1px solid #334155;
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 6px;
+  width: 100%;
+}
+
+small {
+  color: var(--muted);
 }

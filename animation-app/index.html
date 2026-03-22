@@ -1,10 +1,11 @@
-<!-- Main shell for the offline-first animation web app. -->
+<!-- Main shell for the offline-first animation web app (Phase 1). -->
 <!doctype html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#111827" />
+    <meta name="description" content="Offline-first Animation Web App PWA (Phase 1 scaffold)" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles/base.css" />
     <link rel="stylesheet" href="./styles/layout.css" />
@@ -14,18 +15,17 @@
     <link rel="stylesheet" href="./styles/timeline.css" />
     <link rel="stylesheet" href="./styles/modal.css" />
     <link rel="stylesheet" href="./styles/responsive.css" />
-    <title>Animation App (Offline-first PWA)</title>
+    <title>Animation App (Offline-first PWA) — Phase 1</title>
   </head>
   <body>
     <div id="app" class="app-grid">
-      <aside id="toolbar" class="toolbar"></aside>
-      <main id="stage-area" class="stage-area"></main>
-      <aside id="properties-panel" class="properties-panel"></aside>
-      <section id="timeline" class="timeline"></section>
+      <aside id="toolbar" class="toolbar" aria-label="toolbar"></aside>
+      <main id="stage-area" class="stage-area" aria-label="stage"></main>
+      <aside id="properties-panel" class="properties-panel" aria-label="properties panel"></aside>
+      <section id="timeline" class="timeline" aria-label="timeline"></section>
     </div>
 
-    <input id="import-input" type="file" accept="application/json" hidden />
-
+    <noscript>แอปนี้ต้องใช้ JavaScript เพื่อแสดง UI ของโปรเจกต์</noscript>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

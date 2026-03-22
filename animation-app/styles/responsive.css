@@ -1,11 +1,39 @@
-/* Tablet responsive fallback layout. */
+/* Responsive fallbacks for tablet and mobile. */
 @media (max-width: 1200px) {
   .app-grid {
-    grid-template-columns: 68px 1fr;
-    grid-template-rows: 1fr 220px 250px;
+    grid-template-columns: 76px 1fr;
+    grid-template-rows: 1fr 220px 230px;
     grid-template-areas:
       'toolbar stage'
       'toolbar properties'
       'toolbar timeline';
+  }
+}
+
+@media (max-width: 860px) {
+  .app-grid {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      'toolbar'
+      'stage'
+      'properties'
+      'timeline';
+  }
+
+  .toolbar {
+    grid-template-rows: auto;
+  }
+
+  .toolbar-tools {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tool-btn {
+    min-width: 90px;
   }
 }
