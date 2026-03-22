@@ -1,5 +1,6 @@
 // Timeline architecture facade for editor-ready commands and querying.
 import { addFrame, deleteFrame, duplicateFrame } from './frame-manager.js';
+import { normalizeFps } from './fps-controller.js';
 
 function clampFrameIndex(state) {
   state.currentFrameIndex = Math.max(0, Math.min(state.currentFrameIndex, state.frames.length - 1));
@@ -9,7 +10,7 @@ export function createTimelineController({ getState, mutateState }) {
   const commands = {
     selectFrame(index) {
       mutateState((state) => {
-        state.currentFrameIndex = index;
+        state.currentFrameIndex = Number(index) || 0;
         clampFrameIndex(state);
       });
     },
@@ -24,7 +25,7 @@ export function createTimelineController({ getState, mutateState }) {
     },
     setFps(nextFps) {
       mutateState((state) => {
-        state.fps = Math.max(1, Math.min(60, Number(nextFps) || state.fps));
+        state.fps = normalizeFps(nextFps);
       });
     },
     toggleOnionSkin(enabled) {

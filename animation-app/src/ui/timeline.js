@@ -1,4 +1,7 @@
 // Timeline view that renders from state and dispatches command callbacks.
+import { createThumbnail } from '../animation/thumbnail-generator.js';
+import { playbackControlsTemplate } from './playback-controls.js';
+
 export function renderTimeline(root, model) {
   const {
     frames,
@@ -7,6 +10,7 @@ export function renderTimeline(root, model) {
     onionSkin,
     playing,
     onPlay,
+    onPause,
     onStop,
     onAddFrame,
     onDuplicateFrame,
@@ -18,18 +22,19 @@ export function renderTimeline(root, model) {
 
   root.innerHTML = `
     <div class="timeline-controls">
-      <button id="tl-play">▶ ${playing ? 'Playing' : 'Play'}</button>
-      <button id="tl-stop">⏹ Stop</button>
-      <button id="tl-add">＋ Frame</button>
-      <button id="tl-dup">⧉ Duplicate</button>
-      <button id="tl-del">🗑 Delete</button>
-      <label class="inline-label">FPS <input id="tl-fps" type="number" min="1" max="60" value="${fps}" /></label>
-      <label class="inline-label"><input id="tl-onion" type="checkbox" ${onionSkin ? 'checked' : ''} /> Onion Skin</label>
+      ${playbackControlsTemplate({ frames, currentFrameIndex, fps, onionSkin, playing })}
     </div>
-    <div class="frames-row" id="frames-row"></div>
+    <div class="frames-row" id="frames-row" aria-label="timeline frames"></div>
   `;
 
-  root.querySelector('#tl-play')?.addEventListener('click', onPlay);
+  root.querySelector('#tl-play')?.addEventListener('click', () => {
+    if (playing) {
+      onPause();
+      return;
+    }
+    onPlay();
+  });
+
   root.querySelector('#tl-stop')?.addEventListener('click', onStop);
   root.querySelector('#tl-add')?.addEventListener('click', onAddFrame);
   root.querySelector('#tl-dup')?.addEventListener('click', onDuplicateFrame);
@@ -41,13 +46,7 @@ export function renderTimeline(root, model) {
   if (!row) return;
 
   frames.forEach((frame, index) => {
-    const thumb = document.createElement('button');
-    thumb.className = `frame-thumb ${index === currentFrameIndex ? 'active' : ''}`;
-    thumb.type = 'button';
-    thumb.innerHTML = `
-      <span class="frame-preview">Frame ${index + 1}</span>
-      <span class="frame-meta">${frame.id.slice(0, 8)}</span>
-    `;
+    const thumb = createThumbnail(frame, index, index === currentFrameIndex);
     thumb.addEventListener('click', () => onSelectFrame(index));
     row.appendChild(thumb);
   });

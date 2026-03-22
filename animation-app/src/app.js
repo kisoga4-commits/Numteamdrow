@@ -101,12 +101,18 @@ export async function startApp() {
       onionSkin: state.onionSkin,
       playing: state.playing,
       onPlay: () => {
+        if (playback.isRunning()) return;
         actions.setPlaying(true);
         playback.start();
+      },
+      onPause: () => {
+        actions.setPlaying(false);
+        playback.pause();
       },
       onStop: () => {
         actions.setPlaying(false);
         playback.stop();
+        actions.timeline.commands.selectFrame(0);
       },
       onAddFrame: actions.timeline.commands.addFrame,
       onDuplicateFrame: actions.timeline.commands.duplicateFrame,

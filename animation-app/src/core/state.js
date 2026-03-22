@@ -1,5 +1,6 @@
 // In-memory global state container for predictable app behavior.
 import { APP_CONFIG } from '../config.js';
+import { normalizeFps } from '../animation/fps-controller.js';
 
 const blankFrame = () => ({ id: crypto.randomUUID(), imageDataUrl: null, durationMs: 1000 / APP_CONFIG.defaultFps });
 
@@ -47,9 +48,24 @@ export function updateStateWith(producer) {
 
 export function replaceState(nextState) {
   Object.assign(state, nextState);
+
+  state.fps = normalizeFps(state.fps);
+
+  if (!Array.isArray(state.frames) || state.frames.length === 0) {
+    state.frames = [blankFrame()];
+  }
+
+  state.currentFrameIndex = Math.max(0, Math.min(state.currentFrameIndex ?? 0, state.frames.length - 1));
+
   if (!state.selection) {
     state.selection = { active: false, bounds: null, draft: null };
   }
+
+
+  if (!state.selection) {
+    state.selection = { active: false, bounds: null, draft: null };
+  }
+
   emit();
 }
 
