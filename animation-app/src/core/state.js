@@ -16,7 +16,8 @@ export const state = {
   currentFrameIndex: 0,
   playing: false,
   frames: [blankFrame()],
-  layerSettings: { activeLayer: 0, layerCount: 1 }
+  layerSettings: { activeLayer: 0, layerCount: 1 },
+  selection: { active: false, bounds: null, draft: null }
 };
 
 const listeners = new Set();
@@ -46,6 +47,9 @@ export function updateStateWith(producer) {
 
 export function replaceState(nextState) {
   Object.assign(state, nextState);
+  if (!state.selection) {
+    state.selection = { active: false, bounds: null, draft: null };
+  }
   emit();
 }
 
