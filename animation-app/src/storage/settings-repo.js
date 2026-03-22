@@ -2,7 +2,11 @@
 const SETTINGS_KEY = 'animation-app-settings';
 
 export function saveSettings(settings) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Ignore environments where storage is blocked (private mode, strict policies).
+  }
 }
 
 export function loadSettings() {
