@@ -2,7 +2,20 @@
 import { APP_CONFIG } from '../config.js';
 import { normalizeFps } from '../animation/fps-controller.js';
 
-const blankFrame = () => ({ id: crypto.randomUUID(), imageDataUrl: null, durationMs: 1000 / APP_CONFIG.defaultFps });
+const createBlankLayer = (id = crypto.randomUUID()) => ({
+  id,
+  strokes: []
+});
+
+const createBlankLayers = (layerCount = 1) =>
+  Array.from({ length: Math.max(1, Number(layerCount) || 1) }, () => createBlankLayer());
+
+const blankFrame = (layerCount = 1) => ({
+  id: crypto.randomUUID(),
+  imageDataUrl: null,
+  durationMs: 1000 / APP_CONFIG.defaultFps,
+  layers: createBlankLayers(layerCount)
+});
 
 export const state = {
   currentTool: 'brush',
@@ -52,8 +65,29 @@ export function replaceState(nextState) {
   state.fps = normalizeFps(state.fps);
 
   if (!Array.isArray(state.frames) || state.frames.length === 0) {
-    state.frames = [blankFrame()];
+    state.frames = [blankFrame(state.layerSettings?.layerCount)];
   }
+
+  const layerCount = Math.max(1, Number(state.layerSettings?.layerCount) || 1);
+  state.frames = state.frames.map((frame) => {
+    if (!frame || typeof frame !== 'object') {
+      return blankFrame(layerCount);
+    }
+
+    const layers = Array.isArray(frame.layers) ? frame.layers : [];
+    const normalizedLayers = Array.from({ length: layerCount }, (_, index) => {
+      const layer = layers[index];
+      return {
+        id: typeof layer?.id === 'string' && layer.id ? layer.id : crypto.randomUUID(),
+        strokes: Array.isArray(layer?.strokes) ? layer.strokes : []
+      };
+    });
+
+    return {
+      ...frame,
+      layers: normalizedLayers
+    };
+  });
 
   state.currentFrameIndex = Math.max(0, Math.min(state.currentFrameIndex ?? 0, state.frames.length - 1));
 
@@ -65,5 +99,5 @@ export function replaceState(nextState) {
 }
 
 export function createBlankFrame() {
-  return blankFrame();
+  return blankFrame(state.layerSettings?.layerCount);
 }
