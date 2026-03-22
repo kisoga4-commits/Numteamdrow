@@ -5,6 +5,7 @@ import { renderProperties } from './ui/properties-panel.js';
 import { renderTimeline } from './ui/timeline.js';
 import { notify } from './ui/notifications.js';
 import { bindOfflineStatus } from './offline/offline-status.js';
+import { bindInstallPrompt } from './offline/install-prompt.js';
 import { exportProjectJson } from './import-export/export-json.js';
 import { importProjectJson } from './import-export/import-json.js';
 import { loadLatestProject, saveLatestProject } from './storage/project-repo.js';
@@ -131,6 +132,7 @@ export async function startApp() {
   };
 
   bindOfflineStatus(document.getElementById('status-chip'));
+  bindInstallPrompt(document.getElementById('install-button'));
   const unsubscribe = subscribe(render);
   render();
 

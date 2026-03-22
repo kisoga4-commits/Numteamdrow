@@ -1,4 +1,3 @@
-// App bootstrap: mount shell and register baseline service worker.
 import { startApp } from './app.js';
 
 startApp().catch((error) => {
@@ -8,8 +7,8 @@ startApp().catch((error) => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register('./sw.js');
-      console.info('Service worker registered');
+      const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      console.info('Service worker registered', registration.scope);
     } catch (error) {
       console.error('Service worker registration failed', error);
     }
