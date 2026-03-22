@@ -1,7 +1,9 @@
-// Phase 1 bootstrap: mount shell and register baseline service worker.
+// App bootstrap: mount shell and register baseline service worker.
 import { startApp } from './app.js';
 
-startApp();
+startApp().catch((error) => {
+  console.error('Failed to start app', error);
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
