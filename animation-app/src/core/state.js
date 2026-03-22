@@ -48,6 +48,7 @@ export function updateStateWith(producer) {
 
 export function replaceState(nextState) {
   Object.assign(state, nextState);
+
   state.fps = normalizeFps(state.fps);
 
   if (!Array.isArray(state.frames) || state.frames.length === 0) {
@@ -55,6 +56,11 @@ export function replaceState(nextState) {
   }
 
   state.currentFrameIndex = Math.max(0, Math.min(state.currentFrameIndex ?? 0, state.frames.length - 1));
+
+  if (!state.selection) {
+    state.selection = { active: false, bounds: null, draft: null };
+  }
+
 
   if (!state.selection) {
     state.selection = { active: false, bounds: null, draft: null };
