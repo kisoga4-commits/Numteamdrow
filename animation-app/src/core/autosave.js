@@ -4,15 +4,34 @@ import { serializeProject } from './serializer.js';
 import { saveLatestProject } from '../storage/project-repo.js';
 
 let timer = null;
+let lastSavedSnapshot = '';
 
-export function queueAutosave(state) {
+function createSnapshotKey(project) {
+  return JSON.stringify({
+    color: project.color,
+    brushSize: project.brushSize,
+    opacity: project.opacity,
+    fps: project.fps,
+    onionSkin: project.onionSkin,
+    frames: project.frames,
+    layerSettings: project.layerSettings
+  });
+}
+
+export function queueAutosave(state, { onSaved, onError } = {}) {
   clearTimeout(timer);
   timer = setTimeout(async () => {
+    const project = serializeProject(state);
+    const snapshotKey = createSnapshotKey(project);
+    if (snapshotKey === lastSavedSnapshot) return;
+
     try {
-      await saveLatestProject(serializeProject(state));
-      window.dispatchEvent(new CustomEvent('app:notify', { detail: 'Autosaved project' }));
+      await saveLatestProject(project);
+      lastSavedSnapshot = snapshotKey;
+      onSaved?.();
     } catch (error) {
       console.error('Autosave failed', error);
+      onError?.(error);
     }
   }, APP_CONFIG.autosaveDelayMs);
 }

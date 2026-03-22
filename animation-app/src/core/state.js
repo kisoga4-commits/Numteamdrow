@@ -61,11 +61,6 @@ export function replaceState(nextState) {
     state.selection = { active: false, bounds: null, draft: null };
   }
 
-
-  if (!state.selection) {
-    state.selection = { active: false, bounds: null, draft: null };
-  }
-
   emit();
 }
 

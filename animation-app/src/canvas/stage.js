@@ -120,6 +120,9 @@ export function createStageController({ getState, onFrameCommit, onViewportChang
   const onCancel = (event) => {
     if (activePointerId !== event.pointerId) return;
     finishPointer();
+    if (overlayCanvas.hasPointerCapture(event.pointerId)) {
+      overlayCanvas.releasePointerCapture(event.pointerId);
+    }
   };
 
   const onWheel = (event) => {
